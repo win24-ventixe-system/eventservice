@@ -1,4 +1,5 @@
 using Data.Contexts;
+using Data.Handlers;
 using Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Presentation.Services;
@@ -10,6 +11,10 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
 
+var connectionString = builder.Configuration.GetConnectionString("AzureBlobStorage");
+var containerName = "images";
+
+builder.Services.AddScoped<IFileHandler>(_ => new AzureFileHandler(connectionString!, containerName));
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddDbContext<DataContext>( x => x.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
 builder.Services.AddScoped<IEventRepository, EventRepository>();

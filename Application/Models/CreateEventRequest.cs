@@ -1,12 +1,13 @@
 ﻿
 using Data.Entities;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.Models;
 
 public class CreateEventRequest
 {
-    public string Image { get; set; } = null!;
+    public IFormFile? Image { get; set; } 
 
     public string? Title { get; set; }
 
