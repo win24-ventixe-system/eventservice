@@ -6,10 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using Data.Handlers;
 
 namespace Presentation.Services;
-public class EventService(IEventRepository eventRepository, IFileHandler fileHandler) : IEventService
+public class EventService(IEventRepository eventRepository, IFileHandler fileHandler, DataContext context) : IEventService
 {
     private readonly IEventRepository _eventRepository = eventRepository;
     private readonly IFileHandler _fileHandler = fileHandler;
+    private readonly DataContext _context = context;
 
 
     public async Task<EventResult> CreateEventAsync(CreateEventRequest request)
@@ -36,28 +37,28 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
 
             eventEntity.EventsPackages = new List<EventPackageEntity>();
 
-                if (request.Packages != null)
+            if (request.Packages != null)
+            {
+                foreach (var package in request.Packages)
                 {
-                    foreach (var package in request.Packages) 
+                    var packageEntity = new PackageEntity
                     {
-                        var packageEntity = new PackageEntity
-                        {
-                            Title = package.Title,
-                            SeatingArrangement = package.SeatingArrangement,
-                            Placement = package.Placement,
-                            Price = package.Price,
-                            Currency = package.Currency
-                        };
-                        var eventPackage = new EventPackageEntity
-                        {
-                            Event = eventEntity,
-                            Package = packageEntity
-                        };
+                        Title = package.Title,
+                        SeatingArrangement = package.SeatingArrangement,
+                        Placement = package.Placement,
+                        Price = package.Price,
+                        Currency = package.Currency
+                    };
+                    var eventPackage = new EventPackageEntity
+                    {
+                        Event = eventEntity,
+                        Package = packageEntity
+                    };
 
-                        eventEntity.EventsPackages.Add(eventPackage);
-                    }
+                    eventEntity.EventsPackages.Add(eventPackage);
                 }
-           
+            }
+
             var result = await _eventRepository.AddAsync(eventEntity);
             return result.Success
                ? new EventResult { Success = true }
@@ -228,5 +229,25 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
                 Error = ex.Message
             };
         }
+    }
+
+    public List<Package> GetPackages(string eventId)
+    {
+
+        var packages = _context.EventsPackages
+             .Include(ep => ep.Package)
+             .Where(ep => ep.EventId == eventId)
+             .Select(ep => new Package
+             {
+                 Id = ep.Package.Id,
+                 Title = ep.Package.Title,
+                 SeatingArrangement = ep.Package.SeatingArrangement,
+                 Placement = ep.Package.Placement,
+                 Price = ep.Package.Price,
+                 Currency = ep.Package.Currency
+             })
+             .ToList();
+
+        return packages;
     }
 }
