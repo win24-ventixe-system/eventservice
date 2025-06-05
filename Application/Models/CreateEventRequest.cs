@@ -7,14 +7,19 @@ namespace Application.Models;
 
 public class CreateEventRequest
 {
-    public string? Image { get; set; } 
+    [Required]
+    public IFormFile? Image { get; set; }
 
+    [Required]
     public string? Title { get; set; }
 
+    [Required]
     public string? Description { get; set; }
 
+    [Required]
     public DateTime EventDate { get; set; }
 
+    [Required]
     public string? Location { get; set; }
 
     public List<CreatePackageRequest> Packages { get; set; } = [];

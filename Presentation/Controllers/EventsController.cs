@@ -30,21 +30,23 @@ public class EventsController(IEventService eventService, IFileHandler fileHandl
 
     [HttpPost]
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> Create([FromForm] CreateEventRequest request, IFormFile imageFile)
+    public async Task<IActionResult> Create([FromForm] CreateEventRequest request)
     {
+        //if (!ModelState.IsValid)
+        //    return BadRequest(ModelState);
         if (!ModelState.IsValid)
+        {
+            // Log model state errors for debugging
+            foreach (var modelStateEntry in ModelState.Values)
+            {
+                foreach (var error in modelStateEntry.Errors)
+                {
+                    Console.WriteLine($"Model Error: {error.ErrorMessage}");
+                }
+            }
             return BadRequest(ModelState);
-
-
-        if (imageFile != null)
-        {
-            var imageUrl = await _fileHandler.UploadFileAsync(imageFile);
-            request.Image = imageUrl; 
         }
-        else
-        {
-            request.Image = null; // or default image URL
-        }
+
         var result = await _eventService.CreateEventAsync(request);
         return result.Success ? Ok() : StatusCode(500, result.Error);
     }
