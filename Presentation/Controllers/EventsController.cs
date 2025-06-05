@@ -1,4 +1,5 @@
 ﻿using Application.Models;
+using Data.Handlers;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Services;
 
@@ -9,6 +10,7 @@ namespace Presentation.Controllers;
 public class EventsController(IEventService eventService) : ControllerBase
 {
     private readonly IEventService _eventService = eventService;
+
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
@@ -25,13 +27,15 @@ public class EventsController(IEventService eventService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create (CreateEventRequest request)
+    public async Task<IActionResult> Create(CreateEventRequest request)
     {
-        if(!ModelState.IsValid)
-        return BadRequest(ModelState);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        
 
         var result = await _eventService.CreateEventAsync(request);
-        return result.Success ? Ok() : StatusCode(500, result.Error);    
+        return result.Success ? Ok() : StatusCode(500, result.Error);
     }
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, UpdateEventRequest request)
@@ -47,12 +51,12 @@ public class EventsController(IEventService eventService) : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> Delete(string id)
     {
-       
+
         var result = await _eventService.DeleteEventAsync(id);
-        if(result.Success)
+        if (result.Success)
             return NoContent();
 
-        return NotFound(result.Error);  
+        return NotFound(result.Error);
 
     }
 }

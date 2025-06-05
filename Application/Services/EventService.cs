@@ -3,20 +3,25 @@ using Data.Repositories;
 using Application.Models;
 using Data.Contexts;
 using Microsoft.EntityFrameworkCore;
+using Data.Handlers;
 
 namespace Presentation.Services;
-public class EventService(IEventRepository eventRepository) : IEventService
+public class EventService(IEventRepository eventRepository, IFileHandler fileHandler) : IEventService
 {
     private readonly IEventRepository _eventRepository = eventRepository;
+    private readonly IFileHandler _fileHandler = fileHandler;
+
 
     public async Task<EventResult> CreateEventAsync(CreateEventRequest request)
     {
         try
         {
+            var imageFileUri = await _fileHandler.UploadFileAsync(request.Image!);
+
             var eventEntity = new EventEntity
             {
 
-                Image = request.Image,
+                Image = imageFileUri,
                 Title = request.Title,
                 Description = request.Description,
                 Location = request.Location,
@@ -84,10 +89,10 @@ public class EventService(IEventRepository eventRepository) : IEventService
         });
         return new EventResult<IEnumerable<Event>> { Success = true, Result = events };
     }
-   
+
     public async Task<EventResult<Event?>> GetEventAsync(string eventId)
     {
-        var result = await _eventRepository.GetAsync(x=> x.Id == eventId);
+        var result = await _eventRepository.GetAsync(x => x.Id == eventId);
 
 
 
@@ -167,10 +172,10 @@ public class EventService(IEventRepository eventRepository) : IEventService
                         Price = incoming.Price,
                         Currency = incoming.Currency
                     };
-             
+
                 }
 
-                
+
             }
             var updateResult = await _eventRepository.UpdateAsync(entity);
 
@@ -196,7 +201,7 @@ public class EventService(IEventRepository eventRepository) : IEventService
         try
         {
             var result = await _eventRepository.GetAsync(x => x.Id == eventId);
-            if (!result.Success || result.Result != null)
+            if (!result.Success || result.Result == null)
                 return new EventResult { Success = false, Error = "Event not found" };
 
             var deleteResult = await _eventRepository.DeleteAsync(result.Result!);

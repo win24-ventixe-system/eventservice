@@ -17,7 +17,6 @@ public class CreateEventRequest
 
     public string? Location { get; set; }
 
-    //suggested by chat gpt so that the packages are created when creating the event
     public List<CreatePackageRequest> Packages { get; set; } = [];
 
 }

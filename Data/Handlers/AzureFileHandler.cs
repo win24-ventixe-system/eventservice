@@ -1,7 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Identity.Client;
 
 namespace Data.Handlers;
 
@@ -16,7 +15,7 @@ public class AzureFileHandler(string connectionString, string containerName) : I
 
 
         var fileExtension = Path.GetExtension(file.FileName);
-        var fileName = $"{Guid.NewGuid()} {fileExtension}";
+        var fileName = $"{Guid.NewGuid()}{fileExtension}";
 
         string contentType = !string.IsNullOrEmpty(file.ContentType)
             ? file.ContentType
