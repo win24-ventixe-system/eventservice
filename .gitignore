@@ -1,0 +1,6 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/EventService/Presentation/appsettings.json
+/EventService/Presentation/appsettings.Development.json

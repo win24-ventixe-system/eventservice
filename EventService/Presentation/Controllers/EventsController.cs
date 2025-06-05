@@ -32,20 +32,19 @@ public class EventsController(IEventService eventService, IFileHandler fileHandl
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Create([FromForm] CreateEventRequest request)
     {
-
+        //if (!ModelState.IsValid)
+        //    return BadRequest(ModelState);
         if (!ModelState.IsValid)
         {
-            // Add more detailed logging here for ModelState errors
-            foreach (var key in ModelState.Keys)
+            // Log model state errors for debugging
+            foreach (var modelStateEntry in ModelState.Values)
             {
-                var modelStateEntry = ModelState[key];
-                foreach (var error in modelStateEntry!.Errors)
+                foreach (var error in modelStateEntry.Errors)
                 {
-                    // This will show which field has an error and the error message
-                    Console.WriteLine($"Model State Error: Key='{key}', Error='{error.ErrorMessage}', Exception='{error.Exception?.Message}'");
+                    Console.WriteLine($"Model Error: {error.ErrorMessage}");
                 }
             }
-            return BadRequest(ModelState); // This sends the errors back to the client
+            return BadRequest(ModelState);
         }
 
         var result = await _eventService.CreateEventAsync(request);
@@ -73,14 +72,4 @@ public class EventsController(IEventService eventService, IFileHandler fileHandl
         return NotFound(result.Error);
 
     }
-
-
-    [HttpGet("{eventId}/packages")]
-    public IActionResult GetPackages(string eventId)
-    {
-        var packages = _eventService.GetEventAsync(eventId); 
-        return Ok(packages); 
-    }
-
-
 }
