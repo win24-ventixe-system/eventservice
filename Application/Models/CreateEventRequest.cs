@@ -7,7 +7,7 @@ namespace Application.Models;
 
 public class CreateEventRequest
 {
-    public IFormFile? Image { get; set; } 
+    public string? Image { get; set; } 
 
     public string? Title { get; set; }
 

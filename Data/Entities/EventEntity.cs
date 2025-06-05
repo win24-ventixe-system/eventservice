@@ -8,7 +8,7 @@ public class EventEntity
     [Key]
     public string Id { get; set; } = Guid.NewGuid().ToString();
 
-    public string Image {  get; set; } = null!; 
+    public string? Image {  get; set; }  
 
     public string? Title { get; set; } 
 

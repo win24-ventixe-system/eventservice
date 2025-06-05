@@ -16,39 +16,48 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
     {
         try
         {
-            var imageFileUri = await _fileHandler.UploadFileAsync(request.Image!);
+            string? imageFileUri = null;
+
+            if (request.Image != null)
+            {
+                imageFileUri = await _fileHandler.UploadFileAsync(request.Image);
+            }
 
             var eventEntity = new EventEntity
             {
 
-                Image = imageFileUri,
+                Image = imageFileUri ?? string.Empty,
                 Title = request.Title,
                 Description = request.Description,
                 Location = request.Location,
                 EventDate = request.EventDate
 
             };
-            //with chat gpt help
-            eventEntity.EventsPackages = [];
 
-            foreach (var package in request.Packages)
-            {
-                var packageEntity = new PackageEntity
-                {
-                    Title = package.Title,
-                    SeatingArrangement = package.SeatingArrangement,
-                    Placement = package.Placement,
-                    Price = package.Price,
-                    Currency = package.Currency
-                };
-                var eventPackage = new EventPackageEntity
-                {
-                    Event = eventEntity,
-                    Package = packageEntity
-                };
+            eventEntity.EventsPackages = new List<EventPackageEntity>();
 
-                eventEntity.EventsPackages.Add(eventPackage);
-            }
+                if (request.Packages != null)
+                {
+                    foreach (var package in request.Packages) 
+                    {
+                        var packageEntity = new PackageEntity
+                        {
+                            Title = package.Title,
+                            SeatingArrangement = package.SeatingArrangement,
+                            Placement = package.Placement,
+                            Price = package.Price,
+                            Currency = package.Currency
+                        };
+                        var eventPackage = new EventPackageEntity
+                        {
+                            Event = eventEntity,
+                            Package = packageEntity
+                        };
+
+                        eventEntity.EventsPackages.Add(eventPackage);
+                    }
+                }
+           
             var result = await _eventRepository.AddAsync(eventEntity);
             return result.Success
                ? new EventResult { Success = true }
@@ -71,7 +80,7 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
         var events = result.Result?.Select(e => new Event
         {
             Id = e.Id,
-            Image = e.Image,
+            Image = e.Image!,
             Title = e.Title,
             Description = e.Description,
             Location = e.Location,
@@ -103,7 +112,7 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
             var currentEvent = new Event
             {
                 Id = result.Result.Id,
-                Image = result.Result.Image,
+                Image = result.Result.Image!,
                 Title = result.Result.Title,
                 Description = result.Result.Description,
                 Location = result.Result.Location,

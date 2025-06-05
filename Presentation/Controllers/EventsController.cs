@@ -7,9 +7,11 @@ namespace Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class EventsController(IEventService eventService) : ControllerBase
+public class EventsController(IEventService eventService, IFileHandler fileHandler) : ControllerBase
 {
     private readonly IEventService _eventService = eventService;
+    private readonly IFileHandler _fileHandler = fileHandler;
+
 
 
     [HttpGet]
@@ -27,13 +29,22 @@ public class EventsController(IEventService eventService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateEventRequest request)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Create([FromForm] CreateEventRequest request, IFormFile imageFile)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        
 
+        if (imageFile != null)
+        {
+            var imageUrl = await _fileHandler.UploadFileAsync(imageFile);
+            request.Image = imageUrl; 
+        }
+        else
+        {
+            request.Image = null; // or default image URL
+        }
         var result = await _eventService.CreateEventAsync(request);
         return result.Success ? Ok() : StatusCode(500, result.Error);
     }
