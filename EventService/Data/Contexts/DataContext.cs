@@ -1,6 +1,5 @@
 ﻿using Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 namespace Data.Contexts;
 
 public class DataContext(DbContextOptions<DataContext> options) : DbContext(options)
@@ -15,9 +14,39 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<EventPackageEntity>()
-            .HasKey(ep => ep.Id); // You're using a single Id
+        // Configure PackageEntity ID for DB-generated GUIDs
+        modelBuilder.Entity<PackageEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id)
+                  .ValueGeneratedOnAdd()         
+                  .HasDefaultValueSql("NEWID()"); 
+            entity.Property(e => e.Id).HasMaxLength(36);
+        });
 
+        
+        modelBuilder.Entity<EventEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id)
+                  .ValueGeneratedOnAdd()
+                  .HasDefaultValueSql("NEWID()");
+            entity.Property(e => e.Id).HasMaxLength(36);
+        });
+        modelBuilder.Entity<EventPackageEntity>(entity =>
+        {
+            entity.HasKey(ep => ep.Id);
+            entity.Property(ep => ep.Id)
+                  .ValueGeneratedOnAdd()
+                  .HasDefaultValueSql("NEWID()");
+            entity.Property(ep => ep.Id).HasMaxLength(36); 
+                                                           
+        });
+
+
+        modelBuilder.Entity<EventPackageEntity>()
+            .HasKey(ep => ep.Id);
+       
         modelBuilder.Entity<EventPackageEntity>()
             .HasOne(ep => ep.Event)
             .WithMany(e => e.EventsPackages)

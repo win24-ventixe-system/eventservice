@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20250516070308_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20250606225706_AddedEventServiceTables")]
+    partial class AddedEventServiceTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,7 +28,10 @@ namespace Data.Migrations
             modelBuilder.Entity("Data.Entities.EventEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)")
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -37,7 +40,6 @@ namespace Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Image")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Location")
@@ -54,14 +56,17 @@ namespace Data.Migrations
             modelBuilder.Entity("Data.Entities.EventPackageEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)")
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<string>("EventId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(36)");
 
-                    b.Property<int>("PackageId")
-                        .HasColumnType("int");
+                    b.Property<string>("PackageId")
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -74,11 +79,11 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Data.Entities.PackageEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)")
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<string>("Currency")
                         .HasColumnType("nvarchar(max)");
@@ -105,16 +110,14 @@ namespace Data.Migrations
             modelBuilder.Entity("Data.Entities.EventPackageEntity", b =>
                 {
                     b.HasOne("Data.Entities.EventEntity", "Event")
-                        .WithMany("Packages")
+                        .WithMany("EventsPackages")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Data.Entities.PackageEntity", "Package")
-                        .WithMany()
-                        .HasForeignKey("PackageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .WithMany("EventsPackages")
+                        .HasForeignKey("PackageId");
 
                     b.Navigation("Event");
 
@@ -123,7 +126,12 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Data.Entities.EventEntity", b =>
                 {
-                    b.Navigation("Packages");
+                    b.Navigation("EventsPackages");
+                });
+
+            modelBuilder.Entity("Data.Entities.PackageEntity", b =>
+                {
+                    b.Navigation("EventsPackages");
                 });
 #pragma warning restore 612, 618
         }

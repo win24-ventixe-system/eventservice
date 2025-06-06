@@ -14,7 +14,7 @@ public class EventPackageEntity
 
 
     [ForeignKey(nameof(Package))]
-    public int PackageId { get; set; }
+    public string? PackageId { get; set; }
     public PackageEntity Package { get; set; } = null!;
 
 }

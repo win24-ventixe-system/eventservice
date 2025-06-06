@@ -25,7 +25,10 @@ namespace Data.Migrations
             modelBuilder.Entity("Data.Entities.EventEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)")
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -50,14 +53,17 @@ namespace Data.Migrations
             modelBuilder.Entity("Data.Entities.EventPackageEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)")
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<string>("EventId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(36)");
 
-                    b.Property<int>("PackageId")
-                        .HasColumnType("int");
+                    b.Property<string>("PackageId")
+                        .HasColumnType("nvarchar(36)");
 
                     b.HasKey("Id");
 
@@ -70,11 +76,11 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Data.Entities.PackageEntity", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasMaxLength(36)
+                        .HasColumnType("nvarchar(36)")
+                        .HasDefaultValueSql("NEWID()");
 
                     b.Property<string>("Currency")
                         .HasColumnType("nvarchar(max)");
@@ -108,9 +114,7 @@ namespace Data.Migrations
 
                     b.HasOne("Data.Entities.PackageEntity", "Package")
                         .WithMany("EventsPackages")
-                        .HasForeignKey("PackageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PackageId");
 
                     b.Navigation("Event");
 

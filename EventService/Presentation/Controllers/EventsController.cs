@@ -7,10 +7,9 @@ namespace Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class EventsController(IEventService eventService, IFileHandler fileHandler) : ControllerBase
+public class EventsController(IEventService eventService) : ControllerBase
 {
     private readonly IEventService _eventService = eventService;
-    private readonly IFileHandler _fileHandler = fileHandler;
 
 
 
@@ -32,6 +31,7 @@ public class EventsController(IEventService eventService, IFileHandler fileHandl
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Create([FromForm] CreateEventRequest request)
     {
+
         //if (!ModelState.IsValid)
         //    return BadRequest(ModelState);
         if (!ModelState.IsValid)
@@ -50,18 +50,36 @@ public class EventsController(IEventService eventService, IFileHandler fileHandl
         var result = await _eventService.CreateEventAsync(request);
         return result.Success ? Ok() : StatusCode(500, result.Error);
     }
+
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, UpdateEventRequest request)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> Update(string id, [FromForm] UpdateEventRequest request)
     {
+        //if (!ModelState.IsValid)
+        //    return BadRequest(ModelState);
         if (!ModelState.IsValid)
+        {
+            // Log model state errors for debugging here as well
+            foreach (var modelStateEntry in ModelState.Values)
+            {
+                foreach (var error in modelStateEntry.Errors)
+                {
+                    Console.WriteLine($"Model Error (Update): {error.ErrorMessage}");
+                }
+            }
             return BadRequest(ModelState);
+        }
+
+        if (id != request.EventId)
+        {
+            return BadRequest("Event ID in route does not match ID in request body.");
+        }
 
         var result = await _eventService.UpdateEventAsync(id, request);
-
         return result.Success ? Ok() : StatusCode(500, result.Error);
     }
 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
 

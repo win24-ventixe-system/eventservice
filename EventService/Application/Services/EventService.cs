@@ -1,9 +1,10 @@
-﻿using Data.Entities;
-using Data.Repositories;
-using Application.Models;
+﻿using Application.Models;
 using Data.Contexts;
-using Microsoft.EntityFrameworkCore;
+using Data.Entities;
 using Data.Handlers;
+using Data.Repositories;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Presentation.Services;
 public class EventService(IEventRepository eventRepository, IFileHandler fileHandler) : IEventService
@@ -34,7 +35,7 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
 
             };
 
-            eventEntity.EventsPackages = new List<EventPackageEntity>();
+            eventEntity.EventsPackages ??= new List<EventPackageEntity>();
 
                 if (request.Packages != null)
                 {
@@ -42,6 +43,7 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
                     {
                         var packageEntity = new PackageEntity
                         {
+                            
                             Title = package.Title,
                             SeatingArrangement = package.SeatingArrangement,
                             Placement = package.Placement,
@@ -57,22 +59,36 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
                         eventEntity.EventsPackages.Add(eventPackage);
                     }
                 }
-           
+            Console.WriteLine($"Event to save: {JsonSerializer.Serialize(eventEntity)}");
             var result = await _eventRepository.AddAsync(eventEntity);
             return result.Success
                ? new EventResult { Success = true }
                : new EventResult { Success = false, Error = result.Error };
 
         }
-
         catch (Exception ex)
         {
+            Console.WriteLine("Exception: " + ex.Message);
+            Console.WriteLine("Inner: " + ex.InnerException?.Message);
+            Console.WriteLine("Inner.Inner: " + ex.InnerException?.InnerException?.Message);
+
             return new EventResult
             {
                 Success = false,
-                Error = ex.Message
+                Error = ex.InnerException?.InnerException?.Message ?? ex.InnerException?.Message ?? ex.Message
             };
         }
+
+        //catch (Exception ex)
+        //{
+        //    return new EventResult
+        //    {
+        //        Success = false,
+        //        //Error = ex.Message
+        //        Error = ex.InnerException?.InnerException?.Message ?? ex.InnerException?.Message ?? ex.Message
+
+        //    };
+        //}
     }
     public async Task<EventResult<IEnumerable<Event>>> GetEventsAsync()
     {
@@ -87,7 +103,7 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
             EventDate = e.EventDate,
             Packages = e.EventsPackages.Select(ep => new Package
             {
-                Id = ep.Package.Id,
+                Id = ep.Package.Id.ToString(),
                 Title = ep.Package.Title,
                 SeatingArrangement = ep.Package.SeatingArrangement,
                 Placement = ep.Package.Placement,
@@ -146,15 +162,21 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
 
             var entity = result.Result;
 
-            // Update event properties
-            entity.Image = request.Image;
+            // Update basic event properties
             entity.Title = request.Title ?? entity.Title;
             entity.Description = request.Description ?? entity.Description;
             entity.EventDate = request.EventDate;
             entity.Location = request.Location ?? entity.Location;
-
+            if (request.Image != null) // Check if a NEW image file was provided
+            {
+                entity.Image = await _fileHandler.UploadFileAsync(request.Image);
+               
+            }
             // Sync Packages
+
+            entity.EventsPackages ??= new List<EventPackageEntity>();
             var existingEventPackages = entity.EventsPackages.ToList();
+
             // 1. Update or add incoming packages
             foreach (var incoming in request.Packages)
             {
@@ -181,7 +203,11 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
                         Price = incoming.Price,
                         Currency = incoming.Currency
                     };
-
+                    entity.EventsPackages.Add(new EventPackageEntity
+                    {
+                        Event = entity,
+                        Package = newPackage
+                    });
                 }
 
 

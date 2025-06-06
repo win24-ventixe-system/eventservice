@@ -1,12 +1,12 @@
 ﻿
-using Data.Entities;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Models;
 
 public class UpdateEventRequest
 {
-    public int EventId { get; set; }
-    public string Image { get; set; } = null!;
+    public string? EventId { get; set; }
+    public IFormFile? Image { get; set; }
 
     public string? Title { get; set; }
 
@@ -16,6 +16,6 @@ public class UpdateEventRequest
 
     public string? Location { get; set; }
 
-    public List<PackageEntity> Packages { get; set; } = [];
+    public List<Package> Packages { get; set; } = [];
 
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class AddedEventServiceTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,8 +15,8 @@ namespace Data.Migrations
                 name: "Events",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false, defaultValueSql: "NEWID()"),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EventDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -31,8 +31,7 @@ namespace Data.Migrations
                 name: "Packages",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false, defaultValueSql: "NEWID()"),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SeatingArrangement = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Placement = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -48,9 +47,9 @@ namespace Data.Migrations
                 name: "EventsPackages",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    EventId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    PackageId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<string>(type: "nvarchar(36)", maxLength: 36, nullable: false, defaultValueSql: "NEWID()"),
+                    EventId = table.Column<string>(type: "nvarchar(36)", nullable: false),
+                    PackageId = table.Column<string>(type: "nvarchar(36)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -65,8 +64,7 @@ namespace Data.Migrations
                         name: "FK_EventsPackages_Packages_PackageId",
                         column: x => x.PackageId,
                         principalTable: "Packages",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
