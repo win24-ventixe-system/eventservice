@@ -4,3 +4,4 @@
 
 /EventService/Presentation/appsettings.json
 /EventService/Presentation/appsettings.Development.json
+/EventService/Data/Contexts/DataContextFactory.cs
