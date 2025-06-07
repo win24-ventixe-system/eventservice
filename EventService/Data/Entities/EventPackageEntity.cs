@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Data.Entities;
 
@@ -10,11 +11,15 @@ public class EventPackageEntity
 
     [ForeignKey(nameof(Event))]
     public string EventId { get; set; } = null!;
+
+    [JsonIgnore]
     public EventEntity Event { get; set; } = null!;
 
 
     [ForeignKey(nameof(Package))]
     public string? PackageId { get; set; }
+
+    [JsonIgnore]
     public PackageEntity Package { get; set; } = null!;
 
 }

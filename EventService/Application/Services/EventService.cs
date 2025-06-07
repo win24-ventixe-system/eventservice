@@ -93,7 +93,11 @@ public class EventService(IEventRepository eventRepository, IFileHandler fileHan
     public async Task<EventResult<IEnumerable<Event>>> GetEventsAsync()
     {
         var result = await _eventRepository.GetAllAsync();
-        var events = result.Result?.Select(e => new Event
+        if (result.Result == null)
+        {
+            return new EventResult<IEnumerable<Event>> { Success = true, Result = new List<Event>() };
+        }
+        var events = result.Result.Select(e => new Event
         {
             Id = e.Id,
             Image = e.Image!,
